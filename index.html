@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon API</title>
+    <link rel="stylesheet" href="style.css">
+    </head>
+<body>
+    <div class="container"></div>
+    <script>
+        fetch("https://pokeapi.co/api/v2/pokemon/?limit=151", {
+            method: 'GET'
+        })
+        .then(Response => Response.json())
+        .then(function(json) {
+            const promises = json.results.map(function(result) {
+                return fetch(result.url, {
+                    method: 'GET'
+                })
+                .then(Response => Response.json())
+            });
+
+            Promise.all(promises)
+            .then(pokemons => {
+                var container = document.querySelector('.container');
+                pokemons.forEach(pokemon => {
+                    const types = pokemon.types.map(type => type.type.name);
+                    const typeHtml = types.map(type => `<div class="type-box type-${type.toLowerCase()}">${type}</div>`).join('');
+                    container.innerHTML += `
+                        <div class="card">
+                            <strong class="pokemon-id">#${pokemon.id}</strong><br>
+                            <img src="${pokemon.sprites.front_default}"><br>
+                            <strong>${pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)}</strong><br>
+                            <div class="types">${typeHtml}</div><br>
+                        </div>
+                    `;
+                });
+            });
+        })
+    </script>
+</body>
+</html>
